@@ -66,32 +66,18 @@ object DetectionUtils {
         return true
     }
 
-    fun isEyeBlinking(face: Face): Boolean {
+    fun isEyeBlink(face: Face): Boolean {
         val leftEye = face.getLandmark(FaceLandmark.LEFT_EYE)?.position
         val rightEye = face.getLandmark(FaceLandmark.RIGHT_EYE)?.position
 
+        // Check if any of the required landmarks are missing
         if (leftEye == null || rightEye == null) {
-            // If either landmark is not detected, assume eyes are not blinking.
             return false
         }
 
-        // Calculate the vertical distance between the top and bottom of each eye.
-        val leftEyeHeight = leftEye.y
-        val rightEyeHeight = rightEye.y
-
-        // You can adjust these threshold values to suit your specific requirements.
-        val blinkThreshold = 0.2
-
-        // Check if both eyes have a lower aspect ratio, indicating a blink.
-        return leftEyeHeight < blinkThreshold && rightEyeHeight < blinkThreshold
+        return face.leftEyeOpenProbability!! < 0.3 && face.rightEyeOpenProbability!! < 0.3
     }
 
-
-    private fun calculateDistance(point1: PointF, point2: PointF): Float {
-        val dx = point1.x - point2.x
-        val dy = point1.y - point2.y
-        return sqrt(dx * dx + dy * dy)
-    }
 
 
 }

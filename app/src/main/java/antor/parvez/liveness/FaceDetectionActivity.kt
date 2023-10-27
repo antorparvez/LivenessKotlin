@@ -5,13 +5,13 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.Outline
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.view.ViewOutlineProvider
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -64,56 +64,58 @@ class FaceDetectionActivity : AppCompatActivity() {
     }
 
 
-     private fun buildLivenessDetector(): LivenessDetector {
-         val listener = object : LivenessDetector.Listener {
-             @SuppressLint("SetTextI18n")
-             override fun onTaskStarted(task: DetectionTask) {
-                 when (task) {
-                     is FacingDetectionTask ->
-                         binding.guide.text = "ক্যামেরার দিকে তাকান, অথবা ক্যামেরা ঠিক করুন"
+    private fun buildLivenessDetector(): LivenessDetector {
+        val listener = object : LivenessDetector.Listener {
+            @SuppressLint("SetTextI18n")
+            override fun onTaskStarted(task: DetectionTask) {
+                when (task) {
+                    is FacingDetectionTask ->
+                        binding.guide.text = "ক্যামেরার দিকে তাকান, অথবা ক্যামেরা ঠিক করুন"
 
-                    /* is BlinkDetectionTask ->
-                         binding.guide.text = "Blink your eyes"*/
+                    is EyeBlinkDetectionTask ->
+                        binding.guide.text = "Blink your eyes"
 
-                     is ShakeDetectionTask ->
-                         binding.guide.text = "আস্তে আস্তে আপনি আপনার মাথা বাম-ডান দিকে নিন"
-                     is MouthOpenDetectionTask ->
-                         binding.guide.text = "দয়া করে আপনার মুখ খোলুন"
-                     is SmileDetectionTask ->
-                         binding.guide.text = "দয়া করে একটু হাসুন"
-                 }
-             }
+                    is ShakeDetectionTask ->
+                        binding.guide.text = "আস্তে আস্তে আপনি আপনার মাথা বাম-ডান দিকে নিন"
+                    is MouthOpenDetectionTask ->
+                        binding.guide.text = "দয়া করে আপনার মুখ খোলুন"
+                    is SmileDetectionTask ->
+                        binding.guide.text = "দয়া করে একটু হাসুন"
+                }
+            }
 
-             override fun onTaskCompleted(task: DetectionTask, isLastTask: Boolean) {
-                 takePhoto(File(cacheDir, "${System.currentTimeMillis()}.jpg")) {
-                     imageFiles.add(it.absolutePath)
-                     if (isLastTask) {
-                         finishForResult()
-                     }
-                 }
-             }
+            override fun onTaskCompleted(task: DetectionTask, isLastTask: Boolean) {
+                takePhoto(File(cacheDir, "${System.currentTimeMillis()}.jpg")) {
+                    imageFiles.add(it.absolutePath)
+                    if (isLastTask) {
+                        finishForResult()
+                    }
+                }
+            }
 
-             override fun onTaskFailed(task: DetectionTask, code: Int) {
-                 if (code == LivenessDetector.ERROR_MULTI_FACES) {
-                     Toast.makeText(
-                         this@FaceDetectionActivity,
-                         "একসাথে একটির বেশি চেহারা দেওয়া যাবে না !!!",
-                         Toast.LENGTH_LONG
-                     ).show()
-                 }
-             }
-         }
+            override fun onTaskFailed(task: DetectionTask, code: Int) {
+                if (code == LivenessDetector.ERROR_MULTI_FACES) {
+                    Toast.makeText(
+                        this@FaceDetectionActivity,
+                        "একসাথে একটির বেশি চেহারা দেওয়া যাবে না !!!",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
 
-         return LivenessDetector(
-             FacingDetectionTask(),
-             ShakeDetectionTask(),
-             MouthOpenDetectionTask(),
-             SmileDetectionTask()
-         ).also { it.setListener(listener) }
-     }
+        return LivenessDetector(
+            FacingDetectionTask(),
+            ShakeDetectionTask(),
+            EyeBlinkDetectionTask(),
+            MouthOpenDetectionTask(),
+            SmileDetectionTask()
+        ).also { it.setListener(listener) }
+    }
+
 
     private fun finishForResult() {
-        val result = ArrayList(imageFiles.takeLast(4))
+        val result = ArrayList(imageFiles.takeLast(5))
         setResult(RESULT_OK, Intent().putStringArrayListExtra(ResultContract.RESULT_KEY, result))
         finish()
     }

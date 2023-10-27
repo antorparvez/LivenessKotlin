@@ -30,7 +30,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar"
-        tools:text="দয়া করে সামনের দিকে তাকান" />
+        tools:text="Detect the face" />
 
 
     <androidx.camera.view.PreviewView
